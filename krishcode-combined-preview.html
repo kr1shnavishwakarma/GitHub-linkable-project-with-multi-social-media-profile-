@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>krishcode — combined preview</title>
+<style>
+:root {
+  --bg: #f6f8fa; --panel: #ffffff; --border: #d0d7de; --border-soft: #eaeef2;
+  --text: #1f2328; --text-secondary: #656d76; --header-bg: #24292f; --header-text: #f0f6fc;
+  --accent: #0969da; --accent-dark: #0757ba; --success: #1a7f37; --success-bg: #dafbe1;
+  --danger: #cf222e; --danger-bg: #ffebe9; --radius: 6px;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family:var(--sans); font-size:14px; line-height:1.5; min-height:100%; }
+body { display:flex; flex-direction:column; min-height:100vh; }
+a { color:var(--accent); text-decoration:none; cursor:pointer; }
+a:hover { text-decoration:underline; }
+h1,h2,h3 { font-weight:600; margin:0 0 8px; }
+#site-nav { background:var(--header-bg); color:var(--header-text); }
+.nav-inner { max-width:1200px; margin:0 auto; padding:12px 24px; display:flex; align-items:center; gap:20px; }
+.brand { display:flex; align-items:center; gap:8px; color:var(--header-text); font-weight:600; font-size:16px; margin-right:8px; }
+.brand:hover { text-decoration:none; opacity:.9; }
+.nav-links { display:flex; gap:4px; flex:1; }
+.nav-links a { color:#d0d7de; padding:6px 12px; border-radius:var(--radius); font-size:14px; }
+.nav-links a:hover { background:#32383f; text-decoration:none; color:#fff; }
+.nav-links a.active { background:#32383f; color:#fff; font-weight:600; }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-user { display:flex; align-items:center; gap:6px; color:var(--header-text); font-size:13px; }
+.nav-avatar { width:24px; height:24px; border-radius:50%; object-fit:cover; border:1px solid #444c56; }
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:6px 14px; border-radius:var(--radius); border:1px solid var(--border); background:#f6f8fa; color:var(--text); font-size:14px; font-family:var(--sans); cursor:pointer; transition:background .12s ease, border-color .12s ease; }
+.btn:hover { background:#f3f4f6; text-decoration:none; }
+.btn-sm { padding:4px 10px; font-size:12px; }
+.btn-primary { background:var(--success); border-color:rgba(27,31,36,.15); color:#fff; }
+.btn-primary:hover { background:#187a34; }
+.btn-outline { background:transparent; color:var(--header-text); border-color:#545d68; }
+.btn-outline:hover { background:#32383f; }
+.btn-danger { background:var(--danger); color:#fff; border-color:transparent; }
+.btn-danger:hover { background:#b3211a; }
+.btn-block { width:100%; }
+main { flex:1; max-width:1200px; width:100%; margin:0 auto; padding:32px 24px; }
+.narrow { max-width:440px; }
+.panel { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:20px; }
+.panel + .panel { margin-top:16px; }
+.panel-title { font-size:16px; font-weight:600; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border-soft); }
+label { display:block; font-weight:600; font-size:13px; margin:14px 0 4px; }
+label:first-of-type { margin-top:0; }
+input[type="text"], input[type="password"], input[type="url"], textarea, select {
+  width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:var(--radius);
+  font-family:var(--sans); font-size:14px; background:#fff; color:var(--text);
+}
+input:focus, textarea:focus, select:focus { outline:2px solid var(--accent); outline-offset:-1px; border-color:var(--accent); }
+textarea { font-family:var(--mono); resize:vertical; }
+.hint { color:var(--text-secondary); font-size:12px; margin-top:4px; }
+.error-box { background:var(--danger-bg); border:1px solid #ffc1bc; color:var(--danger); padding:10px 12px; border-radius:var(--radius); font-size:13px; margin-bottom:14px; display:none; }
+.error-box.show { display:block; }
+.success-box { background:var(--success-bg); border:1px solid #7ee2a8; color:var(--success); padding:10px 12px; border-radius:var(--radius); font-size:13px; margin-bottom:14px; display:none; }
+.success-box.show { display:block; }
+.captcha-box { display:flex; align-items:center; gap:12px; padding:10px 12px; background:#f6f8fa; border:1px dashed var(--border); border-radius:var(--radius); }
+.captcha-question { font-family:var(--mono); font-weight:700; font-size:16px; letter-spacing:1px; background:#fff; border:1px solid var(--border); padding:6px 14px; border-radius:var(--radius); user-select:none; }
+.captcha-box input { flex:1; }
+.captcha-refresh { background:none; border:none; color:var(--accent); cursor:pointer; font-size:12px; }
+.auth-wrap { display:flex; justify-content:center; padding-top:20px; }
+.auth-card { width:100%; }
+.auth-logo { display:flex; justify-content:center; margin-bottom:20px; color:var(--text); }
+.auth-title { text-align:center; font-size:22px; margin-bottom:20px; }
+.auth-switch { text-align:center; margin-top:16px; font-size:13px; color:var(--text-secondary); }
+.profile-header { display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap; }
+.avatar-wrap { text-align:center; }
+.avatar-img { width:120px; height:120px; border-radius:50%; object-fit:cover; border:1px solid var(--border); display:block; margin-bottom:10px; }
+.profile-main { flex:1; min-width:240px; }
+.username-row { display:flex; gap:8px; align-items:center; margin-bottom:6px; }
+.username-row h1 { font-size:22px; }
+.username-edit { display:none; gap:8px; margin-top:6px; }
+.username-edit.show { display:flex; }
+.readme-render { border:1px solid var(--border); border-radius:var(--radius); padding:16px 20px; background:#fff; }
+.readme-render h1, .readme-render h2, .readme-render h3 { border-bottom:1px solid var(--border-soft); padding-bottom:6px; }
+.readme-render code { background:#f6f8fa; padding:2px 5px; border-radius:4px; font-family:var(--mono); font-size:12.5px; }
+.readme-render ul { padding-left:20px; }
+.muted { color:var(--text-secondary); }
+.repo-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:14px; margin-top:14px; }
+.repo-card { border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; background:#fff; display:flex; flex-direction:column; gap:6px; }
+.repo-card h3 { font-size:15px; }
+.repo-card h3 a { color:var(--accent); }
+.repo-meta { color:var(--text-secondary); font-size:12px; display:flex; gap:12px; align-items:center; }
+.lang-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:4px; }
+.repo-thumb { width:100%; height:110px; object-fit:cover; border-radius:var(--radius); border:1px solid var(--border-soft); background:#f6f8fa; }
+.repo-actions { display:flex; gap:8px; margin-top:auto; padding-top:8px; }
+.empty-state { text-align:center; padding:40px 20px; color:var(--text-secondary); border:1px dashed var(--border); border-radius:var(--radius); }
+.social-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:14px; }
+.social-card { border:1px solid var(--border); border-radius:var(--radius); padding:16px; background:#fff; }
+.social-card-head { display:flex; align-items:center; gap:10px; margin-bottom:10px; font-weight:600; }
+.social-icon { width:24px; height:24px; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#fff; flex-shrink:0; }
+.social-input-row { display:flex; gap:8px; }
+.social-input-row input { flex:1; }
+.editor-layout { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@media (max-width: 900px) { .editor-layout { grid-template-columns:1fr; } }
+.code-tabs { display:flex; gap:4px; margin-bottom:8px; }
+.code-tabs button { padding:6px 12px; border:1px solid var(--border); border-bottom:none; background:#f6f8fa; border-radius:6px 6px 0 0; cursor:pointer; font-size:13px; font-family:var(--mono); }
+.code-tabs button.active { background:#fff; font-weight:700; color:var(--accent); }
+.code-area { width:100%; height:260px; border:1px solid var(--border); border-radius:0 6px 6px 6px; padding:12px; font-family:var(--mono); font-size:13px; display:none; }
+.code-area.active { display:block; }
+.preview-frame { width:100%; height:100%; min-height:320px; border:1px solid var(--border); border-radius:var(--radius); background:#fff; }
+.editor-toolbar { display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; align-items:center; }
+.image-upload-box { border:1px dashed var(--border); border-radius:var(--radius); padding:14px; text-align:center; margin-top:14px; }
+.image-preview { max-width:100%; max-height:140px; margin-top:10px; border-radius:var(--radius); display:none; }
+.image-preview.show { display:inline-block; }
+#site-footer { border-top:1px solid var(--border); background:var(--panel); padding:18px 24px; margin-top:40px; }
+.footer-inner { max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px; color:var(--text-secondary); font-size:12.5px; }
+.footer-credit strong { color:var(--text); }
+.flex { display:flex; } .gap-8 { gap:8px; } .mt-16 { margin-top:16px; }
+.row-between { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+.view { display:none; }
+.view.active { display:block; }
+</style>
+</head>
+<body>
+  <header id="site-nav"></header>
+  <main>
+
+    <!-- LOGIN VIEW -->
+    <section id="view-login" class="view">
+      <div class="auth-wrap">
+        <div class="panel auth-card narrow">
+          <div class="auth-logo">
+            <svg viewBox="0 0 16 16" width="40" height="40" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          </div>
+          <h1 class="auth-title">Sign in to krishcode</h1>
+          <div id="login-success-box" class="success-box">Account created — sign in below.</div>
+          <div id="login-error-box" class="error-box"></div>
+          <form id="login-form" novalidate>
+            <label for="login-username">Username</label>
+            <input type="text" id="login-username" autocomplete="username" required />
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" autocomplete="current-password" required />
+            <button type="submit" class="btn btn-primary btn-block mt-16">Sign in</button>
+          </form>
+          <p class="auth-switch">New here? <a id="go-signup">Create an account</a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SIGNUP VIEW -->
+    <section id="view-signup" class="view">
+      <div class="auth-wrap">
+        <div class="panel auth-card narrow">
+          <div class="auth-logo">
+            <svg viewBox="0 0 16 16" width="40" height="40" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          </div>
+          <h1 class="auth-title">Create your account</h1>
+          <div id="signup-error-box" class="error-box"></div>
+          <form id="signup-form" novalidate>
+            <label for="su-username">Username</label>
+            <input type="text" id="su-username" placeholder="e.g. krishna-dev" required />
+            <label for="su-password">Password</label>
+            <input type="password" id="su-password" placeholder="At least 6 characters" required />
+            <label for="su-confirm">Confirm password</label>
+            <input type="password" id="su-confirm" placeholder="Re-enter your password" required />
+            <label>Verify you're human</label>
+            <div class="captcha-box" id="captcha">
+              <span class="captcha-question">?</span>
+              <input type="text" id="captcha-answer" placeholder="Your answer" required />
+              <button type="button" class="captcha-refresh" id="captcha-refresh">Refresh</button>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block mt-16">Create account</button>
+          </form>
+          <p class="auth-switch">Already have an account? <a id="go-login">Sign in</a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROFILE VIEW -->
+    <section id="view-profile" class="view">
+      <div class="panel">
+        <div class="profile-header">
+          <div class="avatar-wrap">
+            <img id="avatar-img" class="avatar-img" src="" alt="Profile picture" />
+            <input type="file" id="avatar-input" accept="image/*" style="display:none" />
+            <button class="btn btn-sm" id="avatar-btn">Change photo</button>
+          </div>
+          <div class="profile-main">
+            <div class="username-row">
+              <h1 id="username-display"></h1>
+              <button class="btn btn-sm" id="edit-username-btn">Edit</button>
+            </div>
+            <div class="username-edit" id="username-edit">
+              <input type="text" id="username-input" />
+              <button class="btn btn-sm btn-primary" id="save-username-btn">Save</button>
+              <button class="btn btn-sm" id="cancel-username-btn">Cancel</button>
+            </div>
+            <p class="muted" id="repo-count"></p>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="row-between panel-title" style="border-bottom:none;padding-bottom:0;">
+          <span>README.md</span>
+          <button class="btn btn-sm" id="edit-readme-btn">Edit README</button>
+        </div>
+        <div id="readme-view" class="readme-render"></div>
+        <div id="readme-edit" style="display:none;">
+          <textarea id="readme-textarea" rows="10" style="width:100%;"></textarea>
+          <div class="flex gap-8 mt-16">
+            <button class="btn btn-primary" id="save-readme-btn">Save README</button>
+            <button class="btn" id="cancel-readme-btn">Cancel</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="row-between panel-title">
+          <span>Repositories</span>
+          <a class="btn btn-sm btn-primary" id="profile-new-repo">+ New repository</a>
+        </div>
+        <div id="profile-repo-list"></div>
+      </div>
+    </section>
+
+    <!-- REPOSITORIES VIEW -->
+    <section id="view-repositories" class="view">
+      <div class="panel">
+        <div class="row-between panel-title">
+          <span id="repo-heading">Repositories</span>
+          <a class="btn btn-sm btn-primary" id="repos-new-repo">+ New repository</a>
+        </div>
+        <div id="repo-list"></div>
+      </div>
+    </section>
+
+    <!-- SOCIAL VIEW -->
+    <section id="view-social" class="view">
+      <div class="panel">
+        <div class="panel-title">Linked social accounts</div>
+        <p class="muted" style="margin-top:-6px;">Paste the URL to your profile on each platform, then hit <strong>Save</strong> to store it or <strong>Visit</strong> to open it right here.</p>
+        <div class="social-grid mt-16" id="social-grid"></div>
+      </div>
+    </section>
+
+    <!-- EDITOR VIEW -->
+    <section id="view-editor" class="view">
+      <div class="panel">
+        <div class="row-between panel-title">
+          <input type="text" id="repo-name" placeholder="Untitled repository" style="max-width:320px;font-weight:600;" />
+          <div class="flex gap-8">
+            <button class="btn" id="run-btn">▶ Run</button>
+            <button class="btn btn-primary" id="save-btn">Save repository</button>
+          </div>
+        </div>
+        <div class="editor-layout">
+          <div>
+            <div class="code-tabs" id="code-tabs">
+              <button data-tab="html" class="active">index.html</button>
+              <button data-tab="css">style.css</button>
+              <button data-tab="js">script.js</button>
+              <button data-tab="java">Main.java</button>
+            </div>
+            <textarea id="tab-html" class="code-area active" spellcheck="false"></textarea>
+            <textarea id="tab-css" class="code-area" spellcheck="false"></textarea>
+            <textarea id="tab-js" class="code-area" spellcheck="false"></textarea>
+            <textarea id="tab-java" class="code-area" spellcheck="false"></textarea>
+            <p class="hint" id="java-hint" style="display:none;">Java can't execute in the browser preview — this tab just stores your source with the repository.</p>
+            <div class="image-upload-box">
+              <label style="margin:0 0 8px;">Upload an image</label>
+              <input type="file" id="image-input" accept="image/*" />
+              <p class="hint">Used as the repo's thumbnail.</p>
+              <img id="image-preview" class="image-preview" alt="" />
+            </div>
+          </div>
+          <div>
+            <div class="editor-toolbar"><strong>Live preview</strong><span class="muted" style="font-size:12px;">HTML + CSS + JS only</span></div>
+            <iframe id="preview" class="preview-frame" sandbox="allow-scripts"></iframe>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <footer id="site-footer"></footer>
+
+<script>
+/* ============ storage (localStorage, per-browser demo auth) ============ */
+const DB_KEY = "ghc_users_combined";
+const SESSION_KEY = "ghc_session_combined";
+function getUsers(){ try{ return JSON.parse(localStorage.getItem(DB_KEY))||{}; }catch(e){ return {}; } }
+function saveUsers(u){ localStorage.setItem(DB_KEY, JSON.stringify(u)); }
+function getSession(){ return localStorage.getItem(SESSION_KEY); }
+function setSession(n){ localStorage.setItem(SESSION_KEY, n); }
+function clearSession(){ localStorage.removeItem(SESSION_KEY); }
+function getCurrentUser(){ const n=getSession(); if(!n) return null; const u=getUsers(); return u[n]?{username:n,...u[n]}:null; }
+function updateCurrentUser(patch){ const n=getSession(); if(!n) return; const u=getUsers(); u[n]={...u[n],...patch}; saveUsers(u); }
+function hashPassword(pw){ return btoa(unescape(encodeURIComponent(pw))).split("").reverse().join(""); }
+function uid(){ return "r"+Math.random().toString(36).slice(2,10)+Date.now().toString(36); }
+function escapeHtml(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function defaultAvatar(){ return "data:image/svg+xml;utf8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="80" height="80" fill="#d0d7de"/><circle cx="40" cy="30" r="14" fill="#8c959f"/><ellipse cx="40" cy="68" rx="26" ry="18" fill="#8c959f"/></svg>`); }
+function renderMarkdown(src){
+  if(!src) return "<p class='muted'>No README yet.</p>";
+  let html = src.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  html = html.replace(/^### (.*$)/gim,"<h3>$1</h3>").replace(/^## (.*$)/gim,"<h2>$1</h2>").replace(/^# (.*$)/gim,"<h1>$1</h1>")
+    .replace(/\*\*(.*?)\*\*/gim,"<strong>$1</strong>").replace(/\*(.*?)\*/gim,"<em>$1</em>")
+    .replace(/`([^`]+)`/gim,"<code>$1</code>").replace(/^- (.*$)/gim,"<li>$1</li>")
+    .replace(/\n{2,}/g,"</p><p>").replace(/\n/g,"<br/>");
+  html = html.replace(/(<li>.*<\/li>)/gims,"<ul>$1</ul>");
+  return `<p>${html}</p>`;
+}
+function generateCaptcha(el){
+  const a=Math.floor(Math.random()*9)+1, b=Math.floor(Math.random()*9)+1;
+  const ops=["+","-","×"]; const op=ops[Math.floor(Math.random()*ops.length)];
+  let answer = op==="+"?a+b : op==="-"?a-b : a*b;
+  el.dataset.captchaAnswer = answer;
+  el.querySelector(".captcha-question").textContent = `${a} ${op} ${b} = ?`;
+}
+
+/* ============ router ============ */
+let currentParams = {};
+function navigate(view, params={}){
+  currentParams = params;
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  document.getElementById("view-"+view).classList.add("active");
+  window.scrollTo(0,0);
+  renderChrome(view);
+  const initFns = { login: initLogin, signup: initSignup, profile: initProfile, repositories: initRepositories, social: initSocial, editor: initEditor };
+  if(initFns[view]) initFns[view]();
+}
+
+/* ============ chrome (nav + footer) ============ */
+function renderChrome(active){
+  const user = getCurrentUser();
+  const navHost = document.getElementById("site-nav");
+  const footHost = document.getElementById("site-footer");
+  const loggedIn = !!user;
+  const links = loggedIn ? [["profile","Profile"],["repositories","Repositories"],["social","Social"],["editor","Code Editor"]] : [];
+  navHost.innerHTML = `
+    <div class="nav-inner">
+      <a class="brand" id="brand-link">
+        <svg viewBox="0 0 16 16" width="28" height="28" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        <span>krishcode</span>
+      </a>
+      <nav class="nav-links">${links.map(([key,label])=>`<a data-nav="${key}" class="${active===key?"active":""}">${label}</a>`).join("")}</nav>
+      <div class="nav-right">
+        ${loggedIn
+          ? `<span class="nav-user"><img src="${user.avatar||defaultAvatar()}" class="nav-avatar"/>${user.username}</span>
+             <button id="logout-btn" class="btn btn-sm btn-outline">Sign out</button>`
+          : `<a data-nav="login" class="btn btn-sm btn-outline">Sign in</a>
+             <a data-nav="signup" class="btn btn-sm btn-primary">Sign up</a>`}
+      </div>
+    </div>`;
+  navHost.querySelectorAll("[data-nav]").forEach(el=>el.addEventListener("click",()=>navigate(el.dataset.nav)));
+  document.getElementById("brand-link").addEventListener("click",()=>navigate(loggedIn?"profile":"login"));
+  const logoutBtn = document.getElementById("logout-btn");
+  if(logoutBtn) logoutBtn.addEventListener("click",()=>{ clearSession(); navigate("login"); });
+
+  footHost.innerHTML = `
+    <div class="footer-inner">
+      <span>© ${new Date().getFullYear()} krishcode — a static GitHub-style demo</span>
+      <span class="footer-credit">Website created by <strong>Krishna Vishwakarma</strong></span>
+    </div>`;
+}
+
+/* ============ LOGIN ============ */
+function initLogin(){
+  document.getElementById("login-error-box").classList.remove("show");
+  document.getElementById("login-success-box").classList.toggle("show", currentParams.created===true);
+  document.getElementById("login-username").value="";
+  document.getElementById("login-password").value="";
+  document.getElementById("go-signup").onclick = ()=>navigate("signup");
+
+  document.getElementById("login-form").onsubmit = (e)=>{
+    e.preventDefault();
+    const errBox = document.getElementById("login-error-box");
+    errBox.classList.remove("show");
+    const username = document.getElementById("login-username").value.trim();
+    const password = document.getElementById("login-password").value;
+    const users = getUsers();
+    const record = users[username];
+    if(!record || record.password !== hashPassword(password)){
+      errBox.textContent = "Incorrect username or password.";
+      errBox.classList.add("show");
+      return;
+    }
+    setSession(username);
+    navigate("profile");
+  };
+}
+
+/* ============ SIGNUP ============ */
+function initSignup(){
+  const errBox = document.getElementById("signup-error-box");
+  errBox.classList.remove("show");
+  document.getElementById("su-username").value="";
+  document.getElementById("su-password").value="";
+  document.getElementById("su-confirm").value="";
+  document.getElementById("captcha-answer").value="";
+  const captchaEl = document.getElementById("captcha");
+  generateCaptcha(captchaEl);
+  document.getElementById("captcha-refresh").onclick = ()=>{ generateCaptcha(captchaEl); document.getElementById("captcha-answer").value=""; };
+  document.getElementById("go-login").onclick = ()=>navigate("login");
+
+  document.getElementById("signup-form").onsubmit = (e)=>{
+    e.preventDefault();
+    errBox.classList.remove("show");
+    function showError(msg){ errBox.textContent=msg; errBox.classList.add("show"); }
+
+    const username = document.getElementById("su-username").value.trim();
+    const password = document.getElementById("su-password").value;
+    const confirm = document.getElementById("su-confirm").value;
+    const captchaAnswer = document.getElementById("captcha-answer").value.trim();
+
+    if(!/^[a-zA-Z0-9-_]{3,24}$/.test(username)){ showError("Username must be 3-24 characters (letters, numbers, - or _ only)."); return; }
+    if(password.length < 6){ showError("Password must be at least 6 characters."); return; }
+    if(password !== confirm){ showError("Passwords do not match."); return; }
+    if(String(captchaAnswer) !== String(captchaEl.dataset.captchaAnswer)){
+      showError("Captcha answer is incorrect. Please try again.");
+      generateCaptcha(captchaEl); document.getElementById("captcha-answer").value=""; return;
+    }
+    const users = getUsers();
+    if(users[username]){ showError("That username is already taken."); return; }
+    users[username] = {
+      password: hashPassword(password), avatar: "",
+      readme: `# Hi, I'm ${username} 👋\n\nWelcome to my profile. Edit this README to tell people about yourself.`,
+      social: {}, repos: []
+    };
+    saveUsers(users);
+    navigate("login", { created: true });
+  };
+}
+
+/* ============ PROFILE ============ */
+const LANG_COLORS = { HTML:"#e34c26", CSS:"#563d7c", JavaScript:"#f1e05a", Java:"#b07219" };
+
+function initProfile(){
+  let user = getCurrentUser();
+  if(!user){ navigate("login"); return; }
+
+  function paint(){
+    document.getElementById("avatar-img").src = user.avatar || defaultAvatar();
+    document.getElementById("username-display").textContent = user.username;
+    document.getElementById("username-input").value = user.username;
+    document.getElementById("repo-count").textContent = `${user.repos.length} repositor${user.repos.length===1?"y":"ies"}`;
+    document.getElementById("readme-view").innerHTML = renderMarkdown(user.readme);
+    document.getElementById("readme-textarea").value = user.readme || "";
+    paintRepos();
+  }
+  function paintRepos(){
+    const host = document.getElementById("profile-repo-list");
+    if(!user.repos.length){ host.innerHTML = `<div class="empty-state">No repositories yet. <a id="empty-new-link">Create your first one</a>.</div>`;
+      document.getElementById("empty-new-link").onclick=()=>navigate("editor"); return; }
+    host.innerHTML = `<div class="repo-grid">` + user.repos.map(r=>{
+      const langs=[]; if(r.html) langs.push("HTML"); if(r.css) langs.push("CSS"); if(r.js) langs.push("JavaScript"); if(r.java) langs.push("Java");
+      return `<div class="repo-card">
+        ${r.image?`<img class="repo-thumb" src="${r.image}" alt=""/>`:""}
+        <h3><a data-open-repo="${r.id}">${escapeHtml(r.name)}</a></h3>
+        <div class="repo-meta">${langs.map(l=>`<span><span class="lang-dot" style="background:${LANG_COLORS[l]}"></span>${l}</span>`).join("")}</div>
+        <div class="repo-meta">Created ${new Date(r.createdAt).toLocaleDateString()}</div>
+      </div>`;
+    }).join("") + `</div>`;
+    host.querySelectorAll("[data-open-repo]").forEach(a=>a.addEventListener("click",()=>navigate("editor",{repo:a.dataset.openRepo})));
+  }
+
+  paint();
+  document.getElementById("profile-new-repo").onclick = ()=>navigate("editor");
+
+  document.getElementById("avatar-btn").onclick = ()=>document.getElementById("avatar-input").click();
+  document.getElementById("avatar-input").onchange = (e)=>{
+    const file=e.target.files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=()=>{ updateCurrentUser({avatar:reader.result}); user=getCurrentUser(); paint(); renderChrome("profile"); };
+    reader.readAsDataURL(file);
+  };
+
+  document.getElementById("edit-username-btn").onclick = ()=>document.getElementById("username-edit").classList.add("show");
+  document.getElementById("cancel-username-btn").onclick = ()=>{ document.getElementById("username-edit").classList.remove("show"); document.getElementById("username-input").value=user.username; };
+  document.getElementById("save-username-btn").onclick = ()=>{
+    const newName = document.getElementById("username-input").value.trim();
+    if(!/^[a-zA-Z0-9-_]{3,24}$/.test(newName)){ alert("Username must be 3-24 characters (letters, numbers, - or _ only)."); return; }
+    if(newName === user.username){ document.getElementById("username-edit").classList.remove("show"); return; }
+    const users = getUsers();
+    if(users[newName]){ alert("That username is already taken."); return; }
+    users[newName] = users[user.username]; delete users[user.username]; saveUsers(users);
+    setSession(newName); user = getCurrentUser();
+    renderChrome("profile");
+    document.getElementById("username-edit").classList.remove("show");
+    paint();
+  };
+
+  document.getElementById("edit-readme-btn").onclick = ()=>{ document.getElementById("readme-view").style.display="none"; document.getElementById("readme-edit").style.display="block"; };
+  document.getElementById("cancel-readme-btn").onclick = ()=>{ document.getElementById("readme-view").style.display="block"; document.getElementById("readme-edit").style.display="none"; document.getElementById("readme-textarea").value=user.readme||""; };
+  document.getElementById("save-readme-btn").onclick = ()=>{
+    const text = document.getElementById("readme-textarea").value;
+    updateCurrentUser({readme:text}); user=getCurrentUser();
+    document.getElementById("readme-view").style.display="block"; document.getElementById("readme-edit").style.display="none";
+    paint();
+  };
+}
+
+/* ============ REPOSITORIES ============ */
+function initRepositories(){
+  let user = getCurrentUser();
+  if(!user){ navigate("login"); return; }
+  document.getElementById("repos-new-repo").onclick = ()=>navigate("editor");
+
+  function paint(){
+    document.getElementById("repo-heading").textContent = `Repositories (${user.repos.length})`;
+    const host = document.getElementById("repo-list");
+    if(!user.repos.length){ host.innerHTML = `<div class="empty-state">No repositories yet. <a id="empty-new-link2">Create your first one</a>.</div>`;
+      document.getElementById("empty-new-link2").onclick=()=>navigate("editor"); return; }
+    host.innerHTML = `<div class="repo-grid">` + user.repos.map(r=>{
+      const langs=[]; if(r.html) langs.push("HTML"); if(r.css) langs.push("CSS"); if(r.js) langs.push("JavaScript"); if(r.java) langs.push("Java");
+      return `<div class="repo-card">
+        ${r.image?`<img class="repo-thumb" src="${r.image}" alt=""/>`:""}
+        <h3><a data-open-repo="${r.id}">${escapeHtml(r.name)}</a></h3>
+        <div class="repo-meta">${langs.map(l=>`<span><span class="lang-dot" style="background:${LANG_COLORS[l]}"></span>${l}</span>`).join("") || "<span>Empty repo</span>"}</div>
+        <div class="repo-meta">Created ${new Date(r.createdAt).toLocaleDateString()}</div>
+        <div class="repo-actions">
+          <a class="btn btn-sm" data-open-repo="${r.id}">Open</a>
+          <button class="btn btn-sm btn-danger" data-delete="${r.id}">Delete</button>
+        </div>
+      </div>`;
+    }).join("") + `</div>`;
+    host.querySelectorAll("[data-open-repo]").forEach(a=>a.addEventListener("click",()=>navigate("editor",{repo:a.dataset.openRepo})));
+    host.querySelectorAll("[data-delete]").forEach(btn=>btn.addEventListener("click",()=>{
+      if(!confirm("Delete this repository? This cannot be undone.")) return;
+      const id = btn.dataset.delete;
+      const users = getUsers();
+      users[user.username].repos = users[user.username].repos.filter(r=>r.id!==id);
+      saveUsers(users); user = getCurrentUser(); paint();
+    }));
+  }
+  paint();
+}
+
+/* ============ SOCIAL ============ */
+const PLATFORMS = [
+  { key:"github", label:"GitHub", color:"#24292f", icon:"M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.22.48-2.69-1.07-2.69-1.07-.36-.92-.89-1.16-.89-1.16-.72-.5.06-.49.06-.49.8.06 1.22.82 1.22.82.71 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z" },
+  { key:"instagram", label:"Instagram", color:"#d62976", icon:"M8 0C5.83 0 5.56.01 4.7.05 3.85.09 3.27.22 2.76.42a3.9 3.9 0 0 0-1.41.92A3.9 3.9 0 0 0 .42 2.76C.22 3.27.09 3.85.05 4.7.01 5.56 0 5.83 0 8s.01 2.44.05 3.3c.04.85.17 1.43.37 1.94.2.53.48.98.92 1.42.44.44.89.72 1.42.92.51.2 1.09.33 1.94.37.86.04 1.13.05 3.3.05s2.44-.01 3.3-.05c.85-.04 1.43-.17 1.94-.37a3.9 3.9 0 0 0 1.42-.92c.44-.44.72-.89.92-1.42.2-.51.33-1.09.37-1.94.04-.86.05-1.13.05-3.3s-.01-2.44-.05-3.3c-.04-.85-.17-1.43-.37-1.94a3.9 3.9 0 0 0-.92-1.42A3.9 3.9 0 0 0 13.24.42c-.51-.2-1.09-.33-1.94-.37C10.44.01 10.17 0 8 0zm0 3.9a4.1 4.1 0 1 1 0 8.2 4.1 4.1 0 0 1 0-8.2zm0 6.77a2.67 2.67 0 1 0 0-5.34 2.67 2.67 0 0 0 0 5.34zm5.23-6.94a.96.96 0 1 1-1.92 0 .96.96 0 0 1 1.92 0z" },
+  { key:"linkedin", label:"LinkedIn", color:"#0a66c2", icon:"M14.82 0H1.18C.53 0 0 .53 0 1.18v13.64C0 15.47.53 16 1.18 16h13.64c.65 0 1.18-.53 1.18-1.18V1.18C16 .53 15.47 0 14.82 0zM4.75 13.6H2.38V6h2.37v7.6zM3.56 4.98a1.38 1.38 0 1 1 0-2.76 1.38 1.38 0 0 1 0 2.76zM13.6 13.6h-2.37V9.9c0-.88-.02-2.02-1.23-2.02-1.23 0-1.42.96-1.42 1.96v3.76H6.22V6h2.28v1.04h.03c.32-.6 1.1-1.23 2.26-1.23 2.42 0 2.87 1.6 2.87 3.67v4.12z" },
+  { key:"facebook", label:"Facebook", color:"#1877f2", icon:"M16 8.05C16 3.6 12.42 0 8 0S0 3.6 0 8.05c0 4.02 2.93 7.35 6.75 7.95V10.4H4.72V8.05h2.03V6.27c0-2.02 1.2-3.14 3.02-3.14.87 0 1.79.16 1.79.16v1.98h-1.01c-1 0-1.31.62-1.31 1.27v1.51h2.23l-.36 2.35H9.25v5.6C13.07 15.4 16 12.07 16 8.05z" },
+  { key:"pinterest", label:"Pinterest", color:"#e60023", icon:"M8 0a8 8 0 0 0-2.92 15.45c-.04-.62-.08-1.58.02-2.26.09-.62.58-3.94.58-3.94s-.15-.3-.15-.73c0-.7.4-1.22.91-1.22.43 0 .64.32.64.71 0 .43-.28 1.08-.42 1.68-.12.5.25.92.75.92.9 0 1.59-.95 1.59-2.32 0-1.21-.87-2.06-2.11-2.06-1.44 0-2.28 1.08-2.28 2.19 0 .43.17.9.38 1.15a.15.15 0 0 1 .04.15c-.04.17-.14.55-.16.63-.02.1-.08.13-.19.08-.72-.34-1.17-1.38-1.17-2.23 0-1.82 1.32-3.49 3.81-3.49 2 0 3.55 1.42 3.55 3.33 0 1.99-1.25 3.58-2.99 3.58-.58 0-1.13-.3-1.32-.66l-.36 1.37c-.13.5-.48 1.13-.72 1.51A8 8 0 1 0 8 0z" },
+  { key:"twitter", label:"X / Twitter", color:"#000000", icon:"M12.6 0h2.45L9.95 6.79 15.8 16h-4.7l-3.67-5.36L3.2 16H.75l5.4-7.2L.5 0h4.82l3.32 4.9L12.6 0zm-.86 14.37h1.36L4.32 1.54H2.86l8.88 12.83z" },
+];
+function initSocial(){
+  const user = getCurrentUser();
+  if(!user){ navigate("login"); return; }
+  const social = user.social || {};
+  const grid = document.getElementById("social-grid");
+  function iconSvg(p){ return `<svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="${p.icon}"/></svg>`; }
+  grid.innerHTML = PLATFORMS.map(p=>`
+    <div class="social-card">
+      <div class="social-card-head"><span class="social-icon" style="background:${p.color}">${iconSvg(p)}</span>${p.label}</div>
+      <div class="social-input-row"><input type="url" id="input-${p.key}" placeholder="https://${p.key}.com/your-handle" value="${(social[p.key]||"").replace(/"/g,'&quot;')}"/></div>
+      <div class="flex gap-8 mt-16">
+        <button class="btn btn-sm btn-primary" data-save="${p.key}">Save</button>
+        <button class="btn btn-sm" data-visit="${p.key}">Visit</button>
+      </div>
+    </div>`).join("");
+  grid.querySelectorAll("[data-save]").forEach(btn=>btn.addEventListener("click",()=>{
+    const key = btn.dataset.save;
+    const val = document.getElementById(`input-${key}`).value.trim();
+    const users = getUsers();
+    users[user.username].social = users[user.username].social || {};
+    users[user.username].social[key] = val;
+    saveUsers(users);
+    btn.textContent = "Saved ✓"; setTimeout(()=>btn.textContent="Save", 1200);
+  }));
+  grid.querySelectorAll("[data-visit]").forEach(btn=>btn.addEventListener("click",()=>{
+    const key = btn.dataset.visit;
+    let val = document.getElementById(`input-${key}`).value.trim();
+    if(!val){ alert("Paste a profile link first."); return; }
+    if(!/^https?:\/\//i.test(val)) val = "https://"+val;
+    window.location.href = val;
+  }));
+}
+
+/* ============ EDITOR ============ */
+function initEditor(){
+  const user = getCurrentUser();
+  if(!user){ navigate("login"); return; }
+  const editingId = currentParams.repo;
+  let imageData = "";
+
+  const tabs = document.querySelectorAll("#code-tabs button");
+  const areas = document.querySelectorAll(".code-area");
+  tabs.forEach(btn=>{
+    btn.onclick = ()=>{
+      tabs.forEach(b=>b.classList.remove("active")); areas.forEach(a=>a.classList.remove("active"));
+      btn.classList.add("active"); document.getElementById(`tab-${btn.dataset.tab}`).classList.add("active");
+      document.getElementById("java-hint").style.display = btn.dataset.tab==="java" ? "block":"none";
+    };
+  });
+  tabs.forEach(b=>b.classList.remove("active")); areas.forEach(a=>a.classList.remove("active"));
+  tabs[0].classList.add("active"); areas[0].classList.add("active");
+  document.getElementById("java-hint").style.display = "none";
+
+  const defaultHtml = ()=>`<h1>Hello, world!</h1>\n<p>Start editing to see your page come to life.</p>`;
+  const defaultCss = ()=>`body {\n  font-family: sans-serif;\n  padding: 24px;\n  color: #1f2328;\n}`;
+  const defaultJs = ()=>`console.log("Hello from script.js");`;
+  const defaultJava = ()=>`public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, world!");\n    }\n}`;
+
+  let existingRepo = editingId ? user.repos.find(r=>r.id===editingId) : null;
+
+  document.getElementById("repo-name").value = existingRepo ? existingRepo.name : "";
+  document.getElementById("tab-html").value = existingRepo ? existingRepo.html : defaultHtml();
+  document.getElementById("tab-css").value = existingRepo ? existingRepo.css : defaultCss();
+  document.getElementById("tab-js").value = existingRepo ? existingRepo.js : defaultJs();
+  document.getElementById("tab-java").value = existingRepo ? existingRepo.java : defaultJava();
+  imageData = existingRepo ? (existingRepo.image || "") : "";
+  const imgPrev = document.getElementById("image-preview");
+  if(imageData){ imgPrev.src = imageData; imgPrev.classList.add("show"); } else { imgPrev.classList.remove("show"); imgPrev.src=""; }
+
+  function runPreview(){
+    const html = document.getElementById("tab-html").value;
+    const css = document.getElementById("tab-css").value;
+    const js = document.getElementById("tab-js").value;
+    const doc = `<!DOCTYPE html><html><head><style>${css}</style></head><body>${html}<script>${js}<\/script></body></html>`;
+    document.getElementById("preview").srcdoc = doc;
+  }
+  runPreview();
+  document.getElementById("run-btn").onclick = runPreview;
+  ["tab-html","tab-css","tab-js"].forEach(id=>{
+    document.getElementById(id).oninput = ()=>{ clearTimeout(window.__previewDebounce); window.__previewDebounce = setTimeout(runPreview, 500); };
+  });
+
+  document.getElementById("image-input").onchange = (e)=>{
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{ imageData = reader.result; imgPrev.src = imageData; imgPrev.classList.add("show"); };
+    reader.readAsDataURL(file);
+  };
+
+  document.getElementById("save-btn").onclick = ()=>{
+    const name = document.getElementById("repo-name").value.trim() || "untitled-repo";
+    const users = getUsers();
+    const repos = users[user.username].repos;
+    const payload = {
+      name,
+      html: document.getElementById("tab-html").value,
+      css: document.getElementById("tab-css").value,
+      js: document.getElementById("tab-js").value,
+      java: document.getElementById("tab-java").value,
+      image: imageData,
+    };
+    if(existingRepo){
+      const idx = repos.findIndex(r=>r.id===existingRepo.id);
+      repos[idx] = { ...repos[idx], ...payload };
+    } else {
+      repos.push({ id: uid(), createdAt: Date.now(), ...payload });
+    }
+    saveUsers(users);
+    navigate("repositories");
+  };
+}
+
+/* ============ boot ============ */
+navigate(getSession() ? "profile" : "login");
+</script>
+</body>
+</html>
